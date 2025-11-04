@@ -1,18 +1,21 @@
 import { Router } from 'express';
 import {
-  getAlumnos,
-  getAlumno,
-  createAlumno,
-  updateAlumno,
-  deleteAlumno
+    getAlumnos,
+    getAlumno,
+    createAlumno,
+    updateAlumno,
+    deleteAlumno
 } from '../controllers/alumnoController.js';
 
-const router = Router();
+import { TableDef } from '../applicationStructure.js';
 
-router.get('/', getAlumnos);
-router.get('/:numero_libreta', getAlumno);
-router.post('/', createAlumno);
-router.put('/:numero_libreta', updateAlumno);
-router.delete('/:numero_libreta', deleteAlumno);
-
-export default router;
+export function routes(tableDef:TableDef) {
+    const pkPath = tableDef.pk.map(column => `/:${column}`).join('')
+    const router = Router();
+    router.get('/', getAlumnos);
+    router.get(pkPath, getAlumno);
+    router.post('/', createAlumno);
+    router.put(pkPath, updateAlumno);
+    router.delete(pkPath, deleteAlumno);
+    return router
+}
