@@ -3,7 +3,7 @@ import { controllers } from '../controllers/alumnoController.js';
 
 import { TableDef } from '../applicationStructure.js';
 
-export function routes(tableDef:TableDef) {
+export function tableRoutes(tableDef:TableDef) {
     const pkPath = tableDef.pk.map(column => `/:${column}`).join('')
     const router = Router();
     const {
