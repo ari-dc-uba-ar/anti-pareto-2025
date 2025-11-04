@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { pool, Alumno } from '../database/db.js';
-import { ColumnName, TableDef } from '../applicationStructure.js';
+import { pool } from '../database/db.js';
+import { TableDef } from '../applicationStructure.js';
 
 export function controllers(tableDef: TableDef){
 
@@ -13,7 +13,7 @@ const pkDolarCondition = (startingOn:number) => pk.map((colname,i) => `${colname
 const pkParams = (params:Record<string, any>) => pk.map(colname => params[colname])
 const allParams = (params:Record<string, any>) => allColnames.map(colname => params[colname])
 
-const getAlumnos = async (req: Request, res: Response): Promise<void> => {
+const getAlumnos = async (_req: Request, res: Response): Promise<void> => {
   try {
     const result = await pool.query(`SELECT ${allColnames} FROM ${tablename} ORDER BY ${orderBy ?? pk}`);
     res.json(result.rows);

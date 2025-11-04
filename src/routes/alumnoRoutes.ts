@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { controllers } from '../controllers/alumnoController.js';
 
 import { TableDef } from '../applicationStructure.js';
-import { table } from 'console';
 
 export function routes(tableDef:TableDef) {
     const pkPath = tableDef.pk.map(column => `/:${column}`).join('')
