@@ -14,6 +14,8 @@ export interface TableDef {
     columns: ColumnDef[]
     pk: [ColumnName]
     title?: string
+    orderBy?: ColumnName[]
+    elementName?: string
 }
 
 export const tableDefs: TableDef[] = [
@@ -28,7 +30,9 @@ export const tableDefs: TableDef[] = [
                 description: 'edad a la fecha de incripción'               
             },
         ],
-        pk: ['numero_libreta' as ColumnName]
+        pk: ['numero_libreta' as ColumnName],
+        orderBy: ['apellido' as ColumnName, 'nombre' as ColumnName],
+        elementName: 'alumno'
     },
     {
         name: 'materias',
