@@ -1,6 +1,17 @@
 let modoActual = 'nuevo'; // 'nuevo', 'editar', 'ver'
 let alumnoActual = null;
 
+/**
+ * @type {TableDef} 
+ */
+
+var tableDef = {}
+var inputs = {}
+
+function pkJavascript(alumnoData){
+    return '[' + tableDef.pk.map(c => `'${alumnoData[c].replace(/'/g, "\\'")}'`).join(',') + ']'
+}
+
 // Mostrar lista de alumnos
 async function mostrarLista() {
     document.getElementById('menu').classList.add('hidden');
@@ -8,32 +19,23 @@ async function mostrarLista() {
     document.getElementById('lista-container').classList.remove('hidden');
     
     try {
-        const response = await fetch('/api/alumnos');
+        const response = await fetch('/api/'+tableDef.name);
         const alumnos = await response.json();
         
         const tabla = `
             <table>
                 <thead>
                     <tr>
-                        <th>Libreta</th>
-                        <th>Apellido</th>
-                        <th>Nombre</th>
-                        <th>Fecha Inscripción</th>
-                        <th>Edad</th>
-                        <th>Acciones</th>
+                        ${tableDef.columns.map(columnDef => `<th>${escapeHtml(columnDef.title)}</th>`).join('')}
                     </tr>
                 </thead>
                 <tbody>
                     ${alumnos.map(alumno => `
                         <tr>
-                            <td>${alumno.numero_libreta}</td>
-                            <td>${alumno.apellido}</td>
-                            <td>${alumno.nombre}</td>
-                            <td>${alumno.fecha_inscripcion}</td>
-                            <td>${alumno.edad_inscripcion}</td>
+                            ${tableDef.columns.map(columnDef => `<td>${alumno[columnDef.name]}</td>`).join('')}
                             <td>
-                                <button onclick="editarAlumno('${alumno.numero_libreta}')">Editar</button>
-                                <button onclick="eliminarAlumno('${alumno.numero_libreta}')">Borrar</button>
+                                <button onclick="editarAlumno(${pkJavascript(alumno)})">Editar</button>
+                                <button onclick="eliminarAlumno(${pkJavascript(alumno)})">Borrar</button>
                             </td>
                         </tr>
                     `).join('')}
@@ -41,10 +43,10 @@ async function mostrarLista() {
             </table>
         `;
         
-        document.getElementById('tabla-alumnos').innerHTML = tabla;
+        document.getElementById('tabla-datos').innerHTML = tabla;
     } catch (error) {
-        console.error('Error al cargar alumnos:', error);
-        alert('Error al cargar la lista de alumnos');
+        console.error(`Error al cargar ${tableDef.title}:`, error);
+        alert(`Error al cargar la lista de ${tableDef.title}:`);
     }
 }
 
@@ -57,33 +59,35 @@ function nuevoAlumno() {
     document.getElementById('lista-container').classList.add('hidden');
     document.getElementById('form-container').classList.remove('hidden');
     
-    document.getElementById('form-titulo').textContent = 'Nuevo Alumno';
+    document.getElementById('form-titulo').textContent = 'Nuevo '+tableDef.elementName;
     document.getElementById('alumno-form').reset();
-    document.getElementById('numero_libreta').readOnly = false;
+    for (pkColumn of tableDef.pk) {
+        inputs[pkColumn].readOnly = false;
+    }
     document.getElementById('delete-btn').classList.add('hidden');
     document.getElementById('submit-btn').textContent = 'Crear';
 }
 
 // Editar alumno
-async function editarAlumno(numeroLibreta) {
+async function editarAlumno(pk) {
     modoActual = 'editar';
     
     try {
-        const response = await fetch(`/api/alumnos/${numeroLibreta}`);
+        const response = await fetch(`/api/alumnos/${pk.join('/')}`);
         alumnoActual = await response.json();
         
         document.getElementById('menu').classList.add('hidden');
         document.getElementById('lista-container').classList.add('hidden');
         document.getElementById('form-container').classList.remove('hidden');
         
-        document.getElementById('form-titulo').textContent = 'Editar Alumno';
-        document.getElementById('numero_libreta').value = alumnoActual.numero_libreta;
-        document.getElementById('apellido').value = alumnoActual.apellido;
-        document.getElementById('nombre').value = alumnoActual.nombre;
-        document.getElementById('fecha_inscripcion').value = alumnoActual.fecha_inscripcion;
-        document.getElementById('edad_inscripcion').value = alumnoActual.edad_inscripcion;
-        
-        document.getElementById('numero_libreta').readOnly = true;
+        document.getElementById('form-titulo').textContent = 'Editar '+tableDef.elementName;
+
+        for (const columnDef of tableDef.columns) {
+            inputs[columnDef.name].value = alumnoActual[columnDef.name];
+        }
+        for (pkColumn of tableDef.pk) {
+            inputs[pkColumn].readOnly = true;
+        }
         document.getElementById('delete-btn').classList.remove('hidden');
         document.getElementById('submit-btn').textContent = 'Actualizar';
     } catch (error) {
@@ -93,30 +97,30 @@ async function editarAlumno(numeroLibreta) {
 }
 
 // Eliminar alumno
-async function eliminarAlumno(numeroLibreta) {
-    if (confirm('¿Está seguro de que desea eliminar este alumno?')) {
+async function eliminarAlumno(pk) {
+    if (confirm(`¿Está seguro de que desea eliminar este ${tableDef.elementName}?`)) {
         try {
-            const response = await fetch(`/api/alumnos/${numeroLibreta}`, {
+            const response = await fetch(`/api/${tableDef.name}/${pk.join('/')}`, {
                 method: 'DELETE'
             });
             
             if (response.ok) {
-                alert('Alumno eliminado correctamente');
+                alert(`${elementName} eliminado correctamente`);
                 mostrarLista();
             } else {
-                alert('Error al eliminar el alumno');
+                alert(`Error al eliminar el ${elementName}`);
             }
         } catch (error) {
-            console.error('Error al eliminar alumno:', error);
-            alert('Error al eliminar el alumno');
+            console.error(`Error al eliminar ${elementName}:`, error);
+            alert(`Error al eliminar el ${elementName}`);
         }
     }
 }
 
 // Confirmar eliminación desde el formulario
 function confirmarEliminar() {
-    if (confirm('¿Está seguro de que desea eliminar este alumno?')) {
-        eliminarAlumno(alumnoActual.numero_libreta);
+    if (confirm(`¿Está seguro de que desea eliminar este ${elementName}?`)) {
+        eliminarAlumno(tableDef.pk.map(c => alumnoActual[c]));
     }
 }
 
@@ -130,19 +134,23 @@ function cancelar() {
 document.getElementById('alumno-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    const alumnoData = {
-        numero_libreta: document.getElementById('numero_libreta').value,
-        apellido: document.getElementById('apellido').value,
-        nombre: document.getElementById('nombre').value,
-        fecha_inscripcion: document.getElementById('fecha_inscripcion').value,
-        edad_inscripcion: parseInt(document.getElementById('edad_inscripcion').value)
-    };
+    var alumnoData = {}
+
+    for (const columnDef of tableDef.columns) {
+        var value = inputs[columnDef.name].value
+        if (columnDef.type == "int") {
+            value = parseInt(value)
+        }
+        alumnoData[columnDef.name] = value
+    }
     
+    var pk = tableDef.pk.map(c => alumnoData[c])
+
     try {
         let response;
         
         if (modoActual === 'nuevo') {
-            response = await fetch('/api/alumnos', {
+            response = await fetch(`/api/${tableDef.name}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -150,7 +158,7 @@ document.getElementById('alumno-form').addEventListener('submit', async function
                 body: JSON.stringify(alumnoData)
             });
         } else {
-            response = await fetch(`/api/alumnos/${alumnoActual.numero_libreta}`, {
+            response = await fetch(`/api/${tableDef.name}/${pk.join('/')}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -160,7 +168,7 @@ document.getElementById('alumno-form').addEventListener('submit', async function
         }
         
         if (response.ok) {
-            alert(modoActual === 'nuevo' ? 'Alumno creado correctamente' : 'Alumno actualizado correctamente');
+            alert(modoActual === tableDef.elementName + ('nuevo' ? ' creado correctamente' : ' actualizado correctamente'));
             mostrarLista();
         } else {
             const error = await response.json();
@@ -173,6 +181,27 @@ document.getElementById('alumno-form').addEventListener('submit', async function
 });
 
 // Inicializar aplicación
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    const queryString = window.location.search;    
+    const urlParams = new URLSearchParams(queryString);
+    var metadata = await getMetadata();
+    tableDef = metadata.tables.find(tableDef=>tableDef.name == urlParams.get('t'))
     mostrarLista();
+    // Completar el formulario
+    var formContent = document.getElementById('form-content');
+    formContent.innerHTML = ""
+    inputs = {}
+    for (const columnDef of tableDef.columns) {
+        const input = dom('INPUT', {type: mapTypeToHml[columnDef.type] ?? columnDef.type});
+        formContent.appendChild(
+            dom('DIV',{className:'form-group'},[
+                dom('LABEL', {}, [columnDef.title, input])
+            ])
+        )
+        inputs[columnDef.name] = input
+    }
+    const span = document.querySelectorAll('[metadata-table]')
+    span.forEach(s=>{
+        s.textContent = tableDef[s.getAttribute('metadata-table')]
+    })
 });

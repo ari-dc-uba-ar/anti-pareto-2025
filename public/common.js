@@ -24,6 +24,24 @@ function dom(tag, attributes, content){
     for (const attrName in attributes ?? {}) {
         element[attrName] = attributes[attrName]
     }
-    element.append(...content)
+    if (content) element.append(...content)
     return element;
+}
+
+/**
+ * from https://stackoverflow.com/questions/6234773/can-i-escape-html-special-chars-in-javascript
+ * @param {string} unsafe 
+ * @returns 
+ */
+function escapeHtml(unsafe) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+const mapTypeToHml = {
+    "int": "number"
 }

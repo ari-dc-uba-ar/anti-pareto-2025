@@ -18,7 +18,7 @@ export interface TableDef {
     elementName?: string
 }
 
-export const tableDefs: TableDef[] = [
+const tableDefinitions: TableDef[] = [
     {
         name: 'alumnos',
         columns: [
@@ -43,3 +43,24 @@ export const tableDefs: TableDef[] = [
         pk: ['cod_materia' as ColumnName]
     }
 ]
+
+export function completeTableDefaults(tableDef:TableDef[]): TableDef[]{
+    return tableDef.map( t => {
+        return {
+            ...t,
+            title: t.title ?? t.name,
+            elementName: t.elementName ?? 'registro de ' + t.name,
+            orderBy: t.orderBy ?? t.pk,
+            columns: t.columns.map(c => {
+                return {
+                    // title: c.title ?? c.name,
+                    ...c,
+                    title: c.title ?? c.name,
+                    description: c.description ?? ''
+                }
+            })
+        }
+    })
+}
+
+export const tableDefs = completeTableDefaults(tableDefinitions)

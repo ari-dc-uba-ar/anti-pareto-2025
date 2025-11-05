@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { tableRoutes } from './routes/alumnoRoutes.js';
-import { tableDefs } from './applicationStructure.js'
+import { tableDefs, completeTableDefaults } from './applicationStructure.js'
 import { getMetadata } from './routes/metadataAPI.js';
 
 const app = express();

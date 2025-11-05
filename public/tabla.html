@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Alumnos</title>
+    <title>Sistema Anti Pareto</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         .container { max-width: 1200px; margin: 0 auto; }
@@ -22,44 +22,31 @@
 </head>
 <body>
     <div class="container">
-        <h1>Sistema de Gestión de Alumnos</h1>
+        <h1>Sistema Anti Pareto</h1>
         
         <!-- Menú principal -->
         <div id="menu" class="menu">
-            <button onclick="mostrarLista()">Ver Alumnos</button>
-            <button onclick="nuevoAlumno()">Agregar Alumno</button>
+            <button onclick="mostrarLista()">Ver <span metadata-table="title"></span></button>
+            <button onclick="nuevoAlumno()">Agregar <span metadata-table="elementName"></span></button>
         </div>
 
         <!-- Lista de alumnos -->
         <div id="lista-container" class="hidden">
-            <h2>Lista de Alumnos</h2>
-            <div id="tabla-alumnos"></div>
-            <button onclick="nuevoAlumno()">Agregar Nuevo Alumno</button>
+            <h2>Lista de <span metadata-table="title"></span></h2>
+            <div id="tabla-datos"></div>
+            <button onclick="nuevoAlumno()">Agregar Nuevo <span metadata-table="elementName"></span></button>
         </div>
 
         <!-- Formulario de alumno -->
         <div id="form-container" class="form-container hidden">
-            <h2 id="form-titulo">Alumno</h2>
+            <h2 id="form-titulo"><span metadata-table="elementName"></span></h2>
             <form id="alumno-form">
-                <div class="form-group">
-                    <label for="numero_libreta">Número de Libreta:</label>
-                    <input type="text" id="numero_libreta" required>
-                </div>
-                <div class="form-group">
-                    <label for="apellido">Apellido:</label>
-                    <input type="text" id="apellido" required>
-                </div>
-                <div class="form-group">
-                    <label for="nombre">Nombre:</label>
-                    <input type="text" id="nombre" required>
-                </div>
-                <div class="form-group">
-                    <label for="fecha_inscripcion">Fecha de Inscripción:</label>
-                    <input type="date" id="fecha_inscripcion" required>
-                </div>
-                <div class="form-group">
-                    <label for="edad_inscripcion">Edad al inscribirse:</label>
-                    <input type="number" id="edad_inscripcion" required>
+                <div id="form-content">
+                    <div class="form-group" display="none">
+                        <label><span metadata-column="title"></span>
+                            <input type="text" required>
+                        </label>
+                    </div>
                 </div>
                 <div class="form-group">
                     <button type="submit" id="submit-btn">Guardar</button>
@@ -70,6 +57,7 @@
         </div>
     </div>
 
+    <script src="common.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
